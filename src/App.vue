@@ -1,21 +1,26 @@
 <template>
 
-  <div id="base_cabeca">
+<div id="page">
+
+  
     <div id="cabeca">
     
-        <div id="titulo">
-          <h1 >Lista de Contas: </h1>
+        <div id="base_titulo">
+          
+          <div id="titulo">
+            <h1 style="color: #9C9D7E; font-family: 'TimesNewRoman', Times, serif; text-align: center; font-size: 80px;">LISTA DE CONTAS</h1>
+          </div>
+
         </div>
     
           <div id="tabela">
             <q-virtual-scroll
               type="table"
-              style="max-height: 600px; background-color: whitesmoke; color: #9C9D7E; width: 100%; margin-right: 10px;"
+              style="max-height: 600px; background-color: whitesmoke; color: #9C9D7E; width: 100%; margin-right: 10px; border-radius: 5px;"
               :virtual-scroll-item-size="48"
               :virtual-scroll-sticky-size-start="48"
               :virtual-scroll-sticky-size-end="32"
               :items="this.contas"
-    
             >
               <template v-slot:before>
                 <thead class="thead-sticky text-left">
@@ -56,7 +61,6 @@
                     <div v-if="col == 'opcoes'">
 
                       <q-btn id="botao_projetar" @click="projetar(linha)" color="blue-9" icon="edit" push style="margin-left: 10px; margin-top: 10px;"/>
-                      <!--<q-btn id="botao_confirmar" @click="atualizar(linha)" color="green-10" icon="done" push style="margin-left: 10px; margin-top: 10px;"/>-->
                       <q-btn id="botao_confirmar" @click="excluir(linha)" color="red-10" icon="delete" push style="margin-left: 10px; margin-top: 10px;"/>
           
                     </div>
@@ -85,11 +89,8 @@
             </q-virtual-scroll>
           </div>
       </div>
-  </div>
   
-
-    <div id="cadastro">
-      <div id="base_cadastro">
+      <div id="cadastro">
 
         <div id="desc_val">
 
@@ -124,13 +125,32 @@
 
         </div>
     
-        <div id="cadastrar">
+        <div id="cadastrar" v-if="projetando == false">
           <q-btn @click="cadastrar" push label="Cadastar" style="width: 100%; font-weight: bold;" color="brand"/>
         </div>
+        <div id="novo_confirmar" v-else-if="projetando == true">
+          <q-btn @click="atualizar(this.conta_nova)" color="green-9" push style="width: 100%; font-weight: bold;" label="Atualizar"/>
+        </div>
 
-      </div>
+        <q-dialog v-model="alert">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">{{this.dialogo}}</div>
+            </q-card-section>
 
-    </div>
+            <q-card-section class="q-pt-none">
+              
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn flat label="OK" color="primary" @click="listar" v-close-popup />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+
+      </div>    
+
+</div>
 
 </template>
 
@@ -158,6 +178,7 @@
 
     const date = ref('')
     const dataSelecionada = ref('')
+    var dialogo = ''
     
       
       return {
@@ -172,6 +193,12 @@
         contas: [],
 
         columns,
+
+        dialogo,
+
+        alert: false,
+
+        projetando: false,
         
         date,
       
@@ -186,7 +213,6 @@
           date.value = dataSelecionada.value
           
         }
-
       }
      
     },
@@ -216,12 +242,11 @@
             
         Conta
         .cadastrar(this.conta_nova)
-        .then(
-        alert('Conta cadastrada com sucesso!')
-        ) 
-
+        this.dialogo = 'CONTA CADASTRADA COM SUCESSO!'
+        this.alert = true
         this.limparCampos()
-        this.listar()
+        this.listar()        
+
       },
 
       atualizar(conta){
@@ -232,24 +257,21 @@
 
         Conta
         .atualizar(conta)
-        .then(
-          alert('Conta atualizada com sucesso!')
-        )
-
+        this.dialogo = 'CONTA ATUALIZADA COM SUCESSO!'
+        this.alert = true
         this.limparCampos()
         this.listar()
+        this.projetando = false
       },
 
       excluir(conta){
                 
         Conta
         .excluir(conta.id)
-        .then(
-          alert('Conta excluída com sucesso!')
-        )
-
+        this.dialogo = 'CONTA EXCLUÍDA COM SUCESSO!'
+        this.alert = true
         this.limparCampos()
-        this.listar()
+        
       },
 
       limparCampos(){
@@ -279,8 +301,8 @@
         
         this.conta_nova = conta
         this.datarFormulario(conta)
-
-      }  
+        this.projetando = true
+      }
            
       }
   }
@@ -289,31 +311,33 @@
 
 <style>
 
-h1{
-    
-    color: #9C9D7E;
-    font-family: 'Times New Roman', Times, serif;
-    text-align: center;
-  
-  }
-  #cadastro{
-  
-    height: 500px;
+  #page{
+
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
     background-color: #9C9D7E;
+
   }
-  #base_cadastro{
+  #titulo{
+    
+    display: flex;
+    margin-top: 0px;
+    height: 80px;
+    align-items: center;
+
+  }
+  #cadastro{
   
     display: flex;
     flex-direction: column;
     height: 400px;
     align-items: center;
     background-color: whitesmoke;
-    width: 95%;
-    border-radius: 30px;
+    width: 81%;
+    border-radius: 20px;
+    margin-top: 20px;
+    margin-bottom: 50px;
   }
   #edicao{
 
@@ -337,24 +361,18 @@ h1{
   #cabeca{
 
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center; 
     width: 95%;   
+    margin-top: 50px;
   }
-  #base_cabeca{
+  #base_titulo{
 
+    height: 100px;
     display: flex;
-    height: 700px;
-    background-color: #9C9D7E;
+    width: 85%;
     justify-content: center;
     align-items: center;
-  }
-  #titulo{
-
-    height: 600px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     background-color: whitesmoke;
     margin-left: 5px;
     margin-right: 5px;
@@ -392,9 +410,17 @@ h1{
     justify-content: center;  
     margin-top: 50px;  
   }
+  #novo_confirmar{
+
+    display: flex;
+    width:90%;
+    justify-content: center;  
+    margin-top: 50px;  
+  }
   #tabela{
 
-    width: 100%;
+    width: 85%;
+    margin-top: 20px;
   }
   .text-brand {
   color: #9C9D7E !important;
